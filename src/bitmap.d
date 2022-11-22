@@ -1,6 +1,7 @@
 import std;
 
-class BMP {
+struct Color {
+  ubyte[] bgra;
 }
 
 auto unpack(T, U: ubyte)(U[] buf) {
@@ -16,9 +17,7 @@ auto parse(T: ubyte)(T[] buf) {
   if(buf[0x1c..0x1e].unpack!ushort != 32)
     fatal("format is not supported");
 
-  auto data = buf[offs..$]
-    .chunks(4).map!fromBGRA
+  return buf[offs..$]
+    .chunks(4).map!(a => Color(a.dup))
     .chunks(width).array.reverse;
-
-  return BMP(data);
 }
