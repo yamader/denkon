@@ -1,0 +1,4 @@
+name "denkon"
+targetPath "build"
+dflags "-preview=shortenedMethods"
+stringImportPaths "assets"
