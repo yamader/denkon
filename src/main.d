@@ -1,5 +1,9 @@
 import std;
+import core.thread;
 import bitmap;
+import x256;
+
+enum Denkon { Big8, Big24, Small8, Small24 }
 
 enum assets(string fmt, size_t n) = mixin("["~
   iota(n).map!(i => format(q{
@@ -7,8 +11,14 @@ enum assets(string fmt, size_t n) = mixin("["~
   }, format(fmt, i))).join(',')
 ~"]");
 
-enum big = assets!("big%d.bmp", 3).map!parse.array;
-enum small = assets!("small%d.bmp", 3).map!parse.array;
+enum big = assets!("big%d.bmp", 3).map!parse.array,
+     small = assets!("small%d.bmp", 3).map!parse.array;
+enum big8 = big.map!(pic => render(pic.data, false)).array,
+     big24 = big.map!(pic => render(pic.data, true)).array,
+     small8 = small.map!(pic => render(pic.data, false)).array,
+     small24 = small.map!(pic => render(pic.data, true)).array;
+
+auto sleep(size_t ms) => Thread.sleep(ms.dur!("msecs"));
 
 auto size() {
   version(Posix) {
@@ -20,10 +30,25 @@ auto size() {
   }
 }
 
-// full color: experimental
-
 void main(string[] args) {
-  //small.each!((frame) {
+  sleep(1000);
+  big24.each!(each!((row) {
+    row.each!write;
+    writeln;
+  }));
+
+  //small24.each!((row) {
+  //  row.each!write;
+  //  writeln;
   //});
-  size.writeln;
+
+  //big8.each!((row) {
+  //  row.each!write;
+  //  writeln;
+  //});
+
+  //big24.each!((row) {
+  //  row.each!write;
+  //  writeln;
+  //});
 }
