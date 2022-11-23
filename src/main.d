@@ -1,16 +1,29 @@
 import std;
 import bitmap;
 
-enum asset(string name) = cast(immutable ubyte[])import(name);
+enum assets(string fmt, size_t n) = mixin("["~
+  iota(n).map!(i => format(q{
+    cast(immutable ubyte[])import("%s")
+  }, format(fmt, i))).join(',')
+~"]");
 
-enum files = ({
-  enum cnt = 3;
-  enum fmt = "frame%d.bmp";
-  enum names = cnt.iota.map!(i => format(fmt, i)).array;
-  auto a = staticMap!(asset, AliasSeq!names);
-  return names;
-})();
+enum big = assets!("big%d.bmp", 3).map!parse.array;
+enum small = assets!("small%d.bmp", 3).map!parse.array;
+
+auto size() {
+  version(Posix) {
+    import core.sys.posix.unistd, core.sys.posix.sys.ioctl;
+    winsize ws;
+    if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) < 0)
+      throw new Error("ioctl TIOCGWINSZ failed");
+    return tuple!("row", "col")(ws.ws_row, ws.ws_col);
+  }
+}
+
+// full color: experimental
 
 void main(string[] args) {
-  files.writeln;
+  //small.each!((frame) {
+  //});
+  size.writeln;
 }
